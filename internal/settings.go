@@ -9,6 +9,7 @@ type Settings interface {
 
 type settings struct {
 	ConfigFilePath string `json:"-"`
+	HttpPort       int32  `json:"http_port"`
 }
 
 func NewSettings() Settings {

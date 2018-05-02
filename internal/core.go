@@ -20,7 +20,8 @@ type LogFormatter struct {
 
 type core struct {
 	settings
-	log *log.Logger
+	log  *log.Logger
+	http Http
 }
 
 func NewCore(s Settings) Core {
@@ -47,6 +48,10 @@ func NewCore(s Settings) Core {
 }
 
 func (c *core) initializeForeground() error {
+
+	// TODO: server only for master not for minion
+	// Init Http server
+	//c.http = NewHttp(c.GetSettings())
 
 	return nil
 }
