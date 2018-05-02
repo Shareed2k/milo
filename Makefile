@@ -14,9 +14,9 @@ clean:
 	rm -f ${APP}
 
 bindata: clean
-	go-bindata -pkg internal -o ./internal/bindata.go ui/
+	rice embed-go -i ./internal/
 
-build:
+build: bindata
 	CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build \
 		-ldflags "-s -w -X ${PROJECT}/internal.Release=${RELEASE} \
 		-X ${PROJECT}/internal.Commit=${COMMIT} -X ${PROJECT}/internal.BuildTime=${BUILD_TIME}" \

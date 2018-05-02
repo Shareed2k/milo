@@ -2,3 +2,5 @@
 /vendor/
 .idea
 /milo
+/milo_config.json
+/internal/rice-box.go

@@ -18,13 +18,13 @@ func main() {
 	// init settings struct
 	s := internal.NewSettings()
 
+	app.Flags = s.InitFlags()
+	app.Commands = command.Map()
+
 	app.Action = func(ctx *cli.Context) {
 		c := internal.NewCore(s)
 		defer c.OnStop()
 	}
-
-	app.Flags = s.InitFlags()
-	app.Commands = command.Map()
 
 	fmt.Printf(
 		"%s\ncommit: %s, build time: %s, release: %s\n",

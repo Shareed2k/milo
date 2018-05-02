@@ -21,7 +21,7 @@ type LogFormatter struct {
 type core struct {
 	settings
 	log  *log.Logger
-	http Http
+	http HttpServer
 }
 
 func NewCore(s Settings) Core {
@@ -29,34 +29,41 @@ func NewCore(s Settings) Core {
 
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println(r)
+			fmt.Println("Recovered:", r)
 			os.Exit(1)
 		}
 	}()
 
+	// Read config
+	c.readConfig()
+
 	// Initialize all services
-	if err := c.initializeForeground(); err != nil {
-		panic(err)
-	}
+	c.initializeForeground()
 
 	// Bootstrap
-	if err := c.initBootstrap(); err == nil {
-		panic(err)
-	}
+	c.initBootstrap()
 
 	return c
 }
 
 func (c *core) initializeForeground() error {
+	// Set Logger
+	c.log = log.New()
+	c.log.SetLevel(log.InfoLevel | log.DebugLevel | log.ErrorLevel)
 
-	// TODO: server only for master not for minion
-	// Init Http server
-	//c.http = NewHttp(c.GetSettings())
+	if c.MasterMode == true {
+		// Init Http server
+		c.http = NewHttp(c.GetSettings())
+	}
 
 	return nil
 }
 
 func (c *core) initBootstrap() error {
+
+	if c.MasterMode == true {
+		c.http.StartServer()
+	}
 
 	return nil
 }
