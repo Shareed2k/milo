@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"github.com/milo/internal/api"
 )
 
 type HttpServer interface {
@@ -16,7 +17,7 @@ type HttpServer interface {
 
 type httpServer struct {
 	Settings
-	e         *echo.Echo
+	*echo.Echo
 	templates *template.Template
 }
 
@@ -26,36 +27,34 @@ type TemplateRenderer struct {
 
 func NewHttp(s Settings) HttpServer {
 	e := echo.New()
-	return &httpServer{Settings: s, e: e}
+	cnt := e.AcquireContext()
+	cnt.Set("config", s.GetOptions())
+	e.ReleaseContext(cnt)
+	return &httpServer{Settings: s, Echo: e}
 }
 
 func (h *httpServer) StartServer() {
 	s := h.GetOptions()
 
 	// Middleware
-	h.e.Use(middleware.Logger())
-	h.e.Use(middleware.Recover())
-	h.e.Use(middleware.Gzip())
-	h.e.Use(middleware.CORS())
-	h.e.Use(middleware.CSRF())
+	h.Use(middleware.Logger())
+	h.Use(middleware.Recover())
+	h.Use(middleware.Gzip())
+	h.Use(middleware.CORS())
+	h.Use(middleware.CSRF())
 
 	// Routes
-	box := rice.MustFindBox("../ui")
+	api.NewRoutes(h.Echo)
+
+	box := rice.MustFindBox("../ui/dist")
+	tmplBox := rice.MustFindBox("../ui/src/tmpl")
 
 	assetHandler := http.FileServer(box.HTTPBox())
-	// serves the index.html from rice
-	h.e.GET("/", echo.WrapHandler(assetHandler))
 
-	// api
-	api := h.e.Group("/api")
-	api.Use(middleware.JWT([]byte("secret")))
-
-	api.GET("/test", hello)
-
-	//TODO: need to find way where to store routes
+	h.GET("/static/*", echo.WrapHandler(http.StripPrefix("/", assetHandler)))
 
 	// get file contents as string
-	templateString, _ := box.String("index.html")
+	templateString, _ := tmplBox.String("index.html")
 
 	// parse and execute the template
 	tmpl, _ := template.New("index").Parse(templateString)
@@ -63,20 +62,16 @@ func (h *httpServer) StartServer() {
 	renderer := &TemplateRenderer{
 		templates: tmpl,
 	}
-	h.e.Renderer = renderer
+	h.Renderer = renderer
 
-	h.e.GET("/test2", func(c echo.Context) error {
+	h.GET("/", func(c echo.Context) error {
 		return c.Render(http.StatusOK, "index", map[string]interface{}{
 			"csrf": c.Get("csrf"),
 		})
 	})
 
 	// Start Server
-	h.e.Start(fmt.Sprintf(":%d", s.HttpPort))
-}
-
-func hello(c echo.Context) error {
-	return c.String(http.StatusOK, "Hello, World!")
+	h.Start(fmt.Sprintf(":%d", s.HttpPort))
 }
 
 // Render renders a template document
