@@ -24,3 +24,11 @@
 [[constraint]]
   branch = "master"
   name = "github.com/GeertJohan/go.rice"
+
+[[constraint]]
+  name = "google.golang.org/grpc"
+  version = "1.11.3"
+
+[[constraint]]
+  name = "github.com/soheilhy/cmux"
+  version = "0.1.4"

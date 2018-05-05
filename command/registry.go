@@ -1,15 +1,16 @@
 package command
 
 import (
-	"github.com/urfave/cli"
 	"fmt"
+	"github.com/milo/internal"
+	"github.com/urfave/cli"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
 // Factory is a function that returns a new instance of a CLI-sub command.
-type Factory func() (cli.Command, error)
+type Factory func(s internal.Settings) (cli.Command, error)
 
 // registry has an entry for each available CLI sub-command, indexed by sub
 // command name. This should be populated at package init() time via Register().
@@ -30,10 +31,10 @@ func Register(name string, fn Factory) {
 // Map returns a realized mapping of available CLI commands in a format that
 // the CLI class can consume. This should be called after all registration is
 // complete.
-func Map() []cli.Command {
+func Map(s internal.Settings) []cli.Command {
 	m := []cli.Command{}
 	for _, fn := range registry {
-		cmd, err := fn()
+		cmd, err := fn(s)
 
 		if err != nil {
 			panic(err)

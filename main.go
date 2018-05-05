@@ -19,7 +19,7 @@ func main() {
 	s := internal.NewSettings()
 
 	app.Flags = s.InitFlags()
-	app.Commands = command.Map()
+	app.Commands = command.Map(s)
 
 	app.Action = func(ctx *cli.Context) {
 		c := internal.NewCore(s)

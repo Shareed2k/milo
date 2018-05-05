@@ -20,8 +20,8 @@ type LogFormatter struct {
 
 type core struct {
 	settings
-	log  *log.Logger
-	http HttpServer
+	log      *log.Logger
+	operator Operator
 }
 
 func NewCore(s Settings) Core {
@@ -51,21 +51,19 @@ func (c *core) initializeForeground() error {
 	c.log = log.New()
 	c.log.SetLevel(log.InfoLevel | log.DebugLevel | log.ErrorLevel)
 
+	//Set Operator
 	if c.MasterMode == true {
-		// Init Http server
-		c.http = NewHttp(c.GetSettings())
+		c.operator = NewMaster(c)
+	} else {
+		c.operator = NewMinion(c)
 	}
 
 	return nil
 }
 
 func (c *core) initBootstrap() error {
-
-	if c.MasterMode == true {
-		c.http.StartServer()
-	}
-
-	return nil
+	err := c.operator.InitBootstrap()
+	return err
 }
 
 func (c *core) GetSettings() Settings {

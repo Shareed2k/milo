@@ -1,22 +1,22 @@
 package internal
 
 import (
-	"fmt"
 	"github.com/GeertJohan/go.rice"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/milo/internal/api"
 	"html/template"
 	"io"
+	"net"
 	"net/http"
-	"github.com/milo/internal/api"
 )
 
 type HttpServer interface {
-	StartServer()
+	StartServer(l net.Listener)
 }
 
 type httpServer struct {
-	Settings
+	Core
 	*echo.Echo
 	templates *template.Template
 }
@@ -25,17 +25,15 @@ type TemplateRenderer struct {
 	templates *template.Template
 }
 
-func NewHttp(s Settings) HttpServer {
+func NewHttp(c Core) HttpServer {
 	e := echo.New()
 	cnt := e.AcquireContext()
-	cnt.Set("config", s.GetOptions())
+	cnt.Set("config", c.GetSettings().GetOptions())
 	e.ReleaseContext(cnt)
-	return &httpServer{Settings: s, Echo: e}
+	return &httpServer{Core: c, Echo: e}
 }
 
-func (h *httpServer) StartServer() {
-	s := h.GetOptions()
-
+func (h *httpServer) StartServer(l net.Listener) {
 	// Middleware
 	h.Use(middleware.Logger())
 	h.Use(middleware.Recover())
@@ -71,7 +69,7 @@ func (h *httpServer) StartServer() {
 	})
 
 	// Start Server
-	h.Start(fmt.Sprintf(":%d", s.HttpPort))
+	h.Server.Serve(l)
 }
 
 // Render renders a template document

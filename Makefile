@@ -19,6 +19,9 @@ bindata: clean ui
 ui:
 	yarn --cwd ./ui build
 
+grpc:
+	protoc -I=./grpc/ --go_out=plugins=grpc:./internal/ ./grpc/*.proto
+
 build: bindata
 	CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build \
 		-ldflags "-s -w -X ${PROJECT}/internal.Release=${RELEASE} \
@@ -26,4 +29,4 @@ build: bindata
 		-o ${APP} \
 		./main.go
 
-.PHONY: clean bindata build ui
+.PHONY: clean bindata build ui grpc
