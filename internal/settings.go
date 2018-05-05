@@ -9,13 +9,13 @@ type Settings interface {
 
 type settings struct {
 	ConfigFilePath string `json:"-"`
-	HttpPort       int    `json:"http_port"`
+	Port           int    `json:"port"`
 	MasterMode     bool   `json:"master"`
 	MinionMode     bool   `json:"minion"`
 }
 
 func NewSettings() Settings {
-	return &settings{MasterMode:false, MinionMode:true}
+	return &settings{MasterMode: false, MinionMode: true}
 }
 
 func (s *settings) InitFlags() []cli.Flag {
@@ -44,7 +44,7 @@ func (s *settings) InitFlags() []cli.Flag {
 			EnvVar:      "HTTP_PORT",
 			Usage:       "http port",
 			Value:       8080,
-			Destination: &s.HttpPort,
+			Destination: &s.Port,
 		},
 	}
 }

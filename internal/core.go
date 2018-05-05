@@ -12,6 +12,7 @@ type Core interface {
 	OnStop()
 	GetSettings() Settings
 	GetLog() *log.Logger
+	GetOperator() Operator
 }
 
 type LogFormatter struct {
@@ -72,6 +73,10 @@ func (c *core) GetSettings() Settings {
 
 func (c *core) OnStop() {
 	c.log.Out = nil
+}
+
+func (c *core) GetOperator() Operator {
+	return c.operator
 }
 
 func (c *core) GetLog() *log.Logger {

@@ -5,3 +5,4 @@
 /milo_config.json
 /internal/rice-box.go
 /ui/node_modules/
+/test.db

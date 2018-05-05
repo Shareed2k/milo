@@ -2,28 +2,42 @@ package internal
 
 import (
 	"fmt"
+	"github.com/milo/db/models"
 	"github.com/soheilhy/cmux"
 	"net"
 )
+
+type MasterOperator interface {
+	GetDatabase() *Database
+}
 
 type master struct {
 	Core
 	HttpServer
 	MasterServer
+	*Database
 }
 
 func NewMaster(c Core) Operator {
-	// Init Http server
-	return &master{c, NewHttp(c), NewGrpcServer(c)}
+	// Init Http, Grpc server
+	return &master{
+		c,
+		NewHttp(c),
+		NewGrpcServer(c),
+		NewDatabase(c.GetSettings()),
+	}
 }
 
-func (s *master) InitBootstrap() error {
-	settings := s.GetSettings().GetOptions()
-	list, err := net.Listen("tcp", fmt.Sprintf(":%d", settings.HttpPort))
+func (m *master) InitBootstrap() error {
+	settings := m.GetSettings().GetOptions()
+	list, err := net.Listen("tcp", fmt.Sprintf(":%d", settings.Port))
 
 	if err != nil {
 		return err
 	}
+
+	// Run migration
+	m.AutoMigrate(&models.User{})
 
 	// Create a cmux object.
 	tcpm := cmux.New(list)
@@ -33,15 +47,19 @@ func (s *master) InitBootstrap() error {
 	httpL := tcpm.Match(cmux.HTTP1Fast())
 
 	// Create a grpc server
-	go s.getGrpcServer().StartServer(grpcL)
+	go m.getGrpcServer().StartServer(grpcL)
 
 	// Creates a HTTP server
-	go s.StartServer(httpL)
+	go m.StartServer(httpL)
 
 	// Start serving!
 	return tcpm.Serve()
 }
 
-func (s *master) getGrpcServer() GrpcServer {
-	return s.MasterServer.(GrpcServer)
+func (m *master) GetDatabase() *Database {
+	return m.Database
+}
+
+func (m *master) getGrpcServer() GrpcServer {
+	return m.MasterServer.(GrpcServer)
 }
