@@ -1,6 +1,3 @@
 package repositories
 
-
-type Repository interface {
-
-}
+type Repository interface {}

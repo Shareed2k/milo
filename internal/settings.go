@@ -8,10 +8,11 @@ type Settings interface {
 }
 
 type settings struct {
-	ConfigFilePath string `json:"-"`
-	Port           int    `json:"port"`
-	MasterMode     bool   `json:"master"`
-	MinionMode     bool   `json:"minion"`
+	ConfigFilePath  string `json:"-"`
+	SupportPassword string `json:"support_password"`
+	Port            int    `json:"port"`
+	MasterMode      bool   `json:"master"`
+	MinionMode      bool   `json:"minion"`
 }
 
 func NewSettings() Settings {
