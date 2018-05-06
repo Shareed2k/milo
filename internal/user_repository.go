@@ -1,30 +1,23 @@
-package user
+package internal
 
 import (
 	"fmt"
 	"github.com/milo/db/models"
-	"github.com/milo/internal"
 	"github.com/milo/util"
 )
 
 type UserRepository interface {
-	Create(user *models.User) uint
 	DetectOrCreateAdmin() error
 }
 
 type repository struct {
-	core internal.Core
-	*internal.Database
+	core Core
+	*Database
 }
 
-func NewUserRepository(c internal.Core) UserRepository {
-	db := c.GetOperator().(internal.MasterOperator).GetDatabase()
+func NewUserRepository(c Core) UserRepository {
+	db := c.GetOperator().(MasterOperator).GetDatabase()
 	return &repository{c, db}
-}
-
-func (r *repository) Create(user *models.User) uint {
-	r.DB.Create(user)
-	return user.ID
 }
 
 func (r *repository) DetectOrCreateAdmin() error {

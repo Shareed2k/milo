@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"github.com/milo/db/models"
-	"github.com/milo/db/repositories"
 	"github.com/soheilhy/cmux"
 	"net"
 )
@@ -17,7 +16,7 @@ type master struct {
 	HttpServer
 	MasterServer
 	*Database
-	repos map[string]repositories.Repository
+	repos map[string]interface{}
 }
 
 func NewMaster(c Core) Operator {
@@ -27,7 +26,7 @@ func NewMaster(c Core) Operator {
 		NewHttp(c),
 		NewGrpcServer(c),
 		NewDatabase(c.GetSettings()),
-		repositories.Map(c),
+		Map(c),
 	}
 }
 
@@ -42,7 +41,9 @@ func (m *master) InitBootstrap() error {
 	// Run migration
 	m.AutoMigrate(&models.User{})
 
-	_ := m.repos["user"]
+	userRepo, err := m.repos["user"]
+	fmt.Print(userRepo)
+	//userRepo.DetectOrCreateAdmin()
 
 	// Create a cmux object.
 	tcpm := cmux.New(list)

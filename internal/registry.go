@@ -1,12 +1,11 @@
-package repositories
+package internal
 
 import (
-	"github.com/milo/internal"
 	"fmt"
 )
 
 // Factory is a function that returns a new instance of a Repository.
-type Factory func(s internal.Core) (Repository, error)
+type Factory func(s Core) (interface{}, error)
 
 // registry has an entry for each available repository,
 // This should be populated at package init() time via Register().
@@ -24,11 +23,11 @@ func Register(name string, fn Factory) {
 	registry[name] = fn
 }
 
-func Map(c internal.Core) map[string]Repository {
-	m := make(map[string]Repository)
+func Map(c Core) map[string]interface{} {
+	m := make(map[string]interface{})
 	for name, fn := range registry {
 		thisFn := fn
-		m[name] = func() (Repository, error) {
+		m[name] = func() (interface{}, error) {
 			return thisFn(c)
 		}
 	}
