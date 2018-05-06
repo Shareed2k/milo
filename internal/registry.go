@@ -2,10 +2,15 @@ package internal
 
 import (
 	"fmt"
+	"errors"
 )
 
+type Repository interface {
+
+}
+
 // Factory is a function that returns a new instance of a Repository.
-type Factory func(s Core) (interface{}, error)
+type Factory func(s Core) (Repository, error)
 
 // registry has an entry for each available repository,
 // This should be populated at package init() time via Register().
@@ -23,13 +28,25 @@ func Register(name string, fn Factory) {
 	registry[name] = fn
 }
 
-func Map(c Core) map[string]interface{} {
-	m := make(map[string]interface{})
+func Map(c Core) map[string]Repository {
+	m := make(map[string]Repository)
 	for name, fn := range registry {
 		thisFn := fn
-		m[name] = func() (interface{}, error) {
+		m[name] = func() (Repository, error) {
 			return thisFn(c)
 		}
 	}
 	return m
+}
+
+func CreateRepository(name string, c Core) (Repository, error) {
+	engineFactory, ok := registry[name]
+	if !ok {
+		// Factory has not been registered.
+		// Make a list of all available datastore factories for logging.
+		return nil, errors.New(fmt.Sprintf("Invalid Repository name: %s", name))
+	}
+
+	// Run the factory with the configuration.
+	return engineFactory(c)
 }

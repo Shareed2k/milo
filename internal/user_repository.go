@@ -15,9 +15,9 @@ type repository struct {
 	*Database
 }
 
-func NewUserRepository(c Core) UserRepository {
+func NewUserRepository(c Core) (Repository, error) {
 	db := c.GetOperator().(MasterOperator).GetDatabase()
-	return &repository{c, db}
+	return &repository{c, db}, nil
 }
 
 func (r *repository) DetectOrCreateAdmin() error {

@@ -16,17 +16,19 @@ type master struct {
 	HttpServer
 	MasterServer
 	*Database
-	repos map[string]interface{}
+	userRepo UserRepository
 }
 
 func NewMaster(c Core) Operator {
+	userRepo, _ := CreateRepository("user", c)
+
 	// Init Http, Grpc server
 	return &master{
 		c,
 		NewHttp(c),
 		NewGrpcServer(c),
 		NewDatabase(c.GetSettings()),
-		Map(c),
+		userRepo.(UserRepository),
 	}
 }
 
@@ -41,9 +43,8 @@ func (m *master) InitBootstrap() error {
 	// Run migration
 	m.AutoMigrate(&models.User{})
 
-	userRepo, err := m.repos["user"]
-	fmt.Print(userRepo)
-	//userRepo.DetectOrCreateAdmin()
+	// Create user
+	m.userRepo.DetectOrCreateAdmin()
 
 	// Create a cmux object.
 	tcpm := cmux.New(list)
