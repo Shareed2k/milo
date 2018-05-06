@@ -12,7 +12,8 @@ type Core interface {
 	OnStop()
 	GetSettings() Settings
 	GetLog() *log.Logger
-	GetOperator() Operator
+	GetMaster() MasterOperator
+	GetMinion() MinionOperator
 }
 
 type LogFormatter struct {
@@ -20,13 +21,14 @@ type LogFormatter struct {
 }
 
 type core struct {
-	settings
-	log      *log.Logger
-	operator Operator
+	*settings
+	log    *log.Logger
+	master MasterOperator
+	minion MinionOperator
 }
 
 func NewCore(s Settings) Core {
-	c := &core{settings: *s.GetOptions()}
+	c := &core{settings: s.GetOptions()}
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -36,13 +38,17 @@ func NewCore(s Settings) Core {
 	}()
 
 	// Read config
-	c.readConfig()
+	if err := c.readConfig(); err != nil {
+		panic(err)
+	}
 
 	// Initialize all services
 	c.initializeForeground()
 
 	// Bootstrap
-	c.initBootstrap()
+	if err := c.initBootstrap(); err != nil {
+		panic(err)
+	}
 
 	return c
 }
@@ -54,29 +60,40 @@ func (c *core) initializeForeground() error {
 
 	//Set Operator
 	if c.MasterMode == true {
-		c.operator = NewMaster(c)
+		c.master = NewMaster(c)
 	} else {
-		c.operator = NewMinion(c)
+		c.minion = NewMinion(c)
 	}
 
 	return nil
 }
 
 func (c *core) initBootstrap() error {
-	err := c.operator.InitBootstrap()
+	var err error
+
+	if c.MasterMode == true {
+		err = c.master.InitBootstrap()
+	} else {
+		err = c.minion.InitBootstrap()
+	}
+
 	return err
 }
 
 func (c *core) GetSettings() Settings {
-	return &c.settings
+	return c.settings
 }
 
 func (c *core) OnStop() {
 	c.log.Out = nil
 }
 
-func (c *core) GetOperator() Operator {
-	return c.operator
+func (c *core) GetMaster() MasterOperator {
+	return c.master
+}
+
+func (c *core) GetMinion() MinionOperator {
+	return c.minion
 }
 
 func (c *core) GetLog() *log.Logger {
@@ -104,7 +121,7 @@ func (c *core) readConfig() error {
 			return err
 		}
 		// Merge in command line settings (which overwrite respective config file settings)
-		if err := mergo.Merge(&c.settings, configFileSettings); err != nil {
+		if err := mergo.Merge(c.settings, configFileSettings); err != nil {
 			return err
 		}
 	}

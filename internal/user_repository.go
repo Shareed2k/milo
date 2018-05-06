@@ -10,17 +10,17 @@ type UserRepository interface {
 	DetectOrCreateAdmin() error
 }
 
-type repository struct {
+type userRepo struct {
 	core Core
 	*Database
 }
 
 func NewUserRepository(c Core) (Repository, error) {
-	db := c.GetOperator().(MasterOperator).GetDatabase()
-	return &repository{c, db}, nil
+	db := c.GetMaster().GetDatabase()
+	return &userRepo{c, db}, nil
 }
 
-func (r *repository) DetectOrCreateAdmin() error {
+func (r *userRepo) DetectOrCreateAdmin() error {
 	settings := r.core.GetSettings().GetOptions()
 	if settings.SupportPassword != "" {
 		support := &models.User{

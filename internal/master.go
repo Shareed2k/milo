@@ -9,6 +9,8 @@ import (
 
 type MasterOperator interface {
 	GetDatabase() *Database
+	GetServerRepository() ServerRepository
+	InitBootstrap () error
 }
 
 type master struct {
@@ -17,24 +19,23 @@ type master struct {
 	MasterServer
 	*Database
 	userRepo UserRepository
+	serverRepo ServerRepository
 }
 
-func NewMaster(c Core) Operator {
-	userRepo, _ := CreateRepository("user", c)
-
+func NewMaster(c Core) MasterOperator {
 	// Init Http, Grpc server
 	return &master{
-		c,
-		NewHttp(c),
-		NewGrpcServer(c),
-		NewDatabase(c.GetSettings()),
-		userRepo.(UserRepository),
+		Core: c,
+		HttpServer: NewHttp(c),
+		MasterServer: NewGrpcServer(c),
+		Database: NewDatabase(c.GetSettings()),
 	}
 }
 
 func (m *master) InitBootstrap() error {
 	settings := m.GetSettings().GetOptions()
-	list, err := net.Listen("tcp", fmt.Sprintf(":%d", settings.Port))
+	list, err := net.Listen("tcp", fmt.Sprintf(":%d", settings.GrpcPort))
+	httpList, err := net.Listen("tcp", fmt.Sprintf(":%d", settings.HttpPort))
 
 	if err != nil {
 		return err
@@ -42,8 +43,13 @@ func (m *master) InitBootstrap() error {
 
 	// Run migration
 	m.AutoMigrate(&models.User{})
+	m.AutoMigrate(&models.Server{})
 
-	// Create user
+	// Create admin user
+	userRepo, _ := CreateRepository("user", m.Core)
+	serverRepo, _ := CreateRepository("server", m.Core)
+	m.userRepo = userRepo.(UserRepository)
+	m.serverRepo = serverRepo.(ServerRepository)
 	m.userRepo.DetectOrCreateAdmin()
 
 	// Create a cmux object.
@@ -51,13 +57,13 @@ func (m *master) InitBootstrap() error {
 
 	//grpcL := tcpm.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
 	grpcL := tcpm.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
-	httpL := tcpm.Match(cmux.HTTP1Fast())
+	//httpL := tcpm.Match(cmux.HTTP1Fast())
 
 	// Create a grpc server
 	go m.getGrpcServer().StartServer(grpcL)
 
 	// Creates a HTTP server
-	go m.StartServer(httpL)
+	go m.StartServer(httpList)
 
 	// Start serving!
 	return tcpm.Serve()
@@ -69,4 +75,12 @@ func (m *master) GetDatabase() *Database {
 
 func (m *master) getGrpcServer() GrpcServer {
 	return m.MasterServer.(GrpcServer)
+}
+
+func (m *master) GetServerRepository() ServerRepository {
+	return m.serverRepo
+}
+
+func (m *master) Close() {
+
 }

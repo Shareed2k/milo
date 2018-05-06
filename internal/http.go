@@ -9,6 +9,8 @@ import (
 	"io"
 	"net"
 	"net/http"
+	_ "github.com/casbin/casbin"
+	_ "github.com/labstack/echo-contrib/casbin"
 )
 
 type HttpServer interface {
@@ -40,6 +42,7 @@ func (h *httpServer) StartServer(l net.Listener) {
 	h.Use(middleware.Gzip())
 	h.Use(middleware.CORS())
 	h.Use(middleware.CSRF())
+	//h.Use(casbinmw.Middleware(casbin.NewEnforcer("./configs/auth_model.conf", "./configs/policy.csv")))
 
 	// Routes
 	api.NewRoutes(h.Echo)

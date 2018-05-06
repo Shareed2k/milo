@@ -13,9 +13,13 @@ service Master {
 
 message JoinRequest {
     string token = 1;
-    string ip = 2;
 
-    google.protobuf.Struct extra = 3;
+    message Minion {
+        string PrivateAddr = 1;
+        string PublicAddr = 2;
+    }
+
+    Minion minion = 2;
 }
 
 message JoinResponse {

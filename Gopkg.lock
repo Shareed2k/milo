@@ -3,9 +3,21 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/AndreasBriese/bbloom"
+  packages = ["."]
+  revision = "28f7e881ca57bc00e028f9ede9f0d9104cfeef5e"
+
+[[projects]]
+  branch = "master"
   name = "github.com/GeertJohan/go.rice"
   packages = [".","embedded"]
   revision = "c02ca9a983da5807ddf7d796784928f5be4afd09"
+
+[[projects]]
+  name = "github.com/Knetic/govaluate"
+  packages = ["."]
+  revision = "d216395917cc49052c7c7094cf57f09657ca08a8"
+  version = "v3.0.0"
 
 [[projects]]
   name = "github.com/Sirupsen/logrus"
@@ -14,16 +26,34 @@
   version = "v1.0.5"
 
 [[projects]]
+  name = "github.com/casbin/casbin"
+  packages = [".","config","effect","model","persist","persist/file-adapter","rbac","rbac/default-role-manager","util"]
+  revision = "d71629e497929858300c38cd442098c178121c30"
+  version = "v1.5.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/daaku/go.zipexe"
   packages = ["."]
   revision = "a5fe2436ffcb3236e175e5149162b41cd28bd27d"
 
 [[projects]]
+  name = "github.com/dgraph-io/badger"
+  packages = [".","options","protos","skl","table","y"]
+  revision = "754278dbecbe8bfa0fec445d6af3bc2e0cf21911"
+  version = "v1.4.0"
+
+[[projects]]
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
   revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
   version = "v3.2.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/dgryski/go-farm"
+  packages = ["."]
+  revision = "2de33835d10275975374b37b2dcfd22c9020a1f5"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -62,6 +92,12 @@
   version = "3.3.5"
 
 [[projects]]
+  name = "github.com/labstack/echo-contrib"
+  packages = ["casbin"]
+  revision = "7d9d9632a4aadf9b026436e43d5f96eca2d895a6"
+  version = "0.5.2"
+
+[[projects]]
   name = "github.com/labstack/gommon"
   packages = ["bytes","color","log","random"]
   revision = "588f4e8bddc6cb45c27b448e925c7fd6a5545434"
@@ -84,6 +120,18 @@
   packages = ["."]
   revision = "6c771bb9887719704b210e87e934f08be014bdb1"
   version = "v1.6.0"
+
+[[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/soheilhy/cmux"
@@ -148,6 +196,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "caa4679ea188d8f3945d6e26871095622b56a1d8c3a9147cc275ded4ab4a5c22"
+  inputs-digest = "1dad630c13c5ed887aff22cbd412a297a9fda3c6cd625d827e4a9469fee1545b"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+	"github.com/milo/db/models"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"net"
@@ -15,7 +17,9 @@ type server struct {
 }
 
 func NewGrpcServer(c Core) MasterServer {
-	return &server{c}
+	return &server{
+		Core:   c,
+	}
 }
 
 func (s *server) StartServer(l net.Listener) {
@@ -26,7 +30,21 @@ func (s *server) StartServer(l net.Listener) {
 }
 
 func (s *server) Join(ctx context.Context, in *JoinRequest) (*JoinResponse, error) {
-	return nil, nil
+	fmt.Println(in)
+
+	model := &models.Server{
+		PrivateIp:   in.GetMinion().GetPrivateAddr(),
+		PublicIp:    in.GetMinion().PublicAddr,
+		Description: "test test description",
+	}
+
+	repo := s.GetMaster().GetServerRepository()
+	repo.Create(model)
+
+	return &JoinResponse{
+		Uuid:    model.Uuid,
+		Message: model.Description,
+	}, nil
 }
 
 func (s *server) StreamRule(in *Rule, str Master_StreamRuleServer) error {

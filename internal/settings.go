@@ -10,7 +10,11 @@ type Settings interface {
 type settings struct {
 	ConfigFilePath  string `json:"-"`
 	SupportPassword string `json:"support_password"`
-	Port            int    `json:"port"`
+	BindAddr        string `json:"bind_addr"`
+	PrivateAddr     string `json:"private_addr"`
+	MasterAddr      string `json:"master_addr"`
+	HttpPort        int    `json:"http_port"`
+	GrpcPort        int    `json:"grpc_port"`
 	MasterMode      bool   `json:"master"`
 	MinionMode      bool   `json:"minion"`
 }
@@ -45,7 +49,14 @@ func (s *settings) InitFlags() []cli.Flag {
 			EnvVar:      "HTTP_PORT",
 			Usage:       "http port",
 			Value:       8080,
-			Destination: &s.Port,
+			Destination: &s.HttpPort,
+		},
+		cli.IntFlag{
+			Name:        "grpc_port",
+			EnvVar:      "GRPC_PORT",
+			Usage:       "grpc port",
+			Value:       8551,
+			Destination: &s.GrpcPort,
 		},
 	}
 }

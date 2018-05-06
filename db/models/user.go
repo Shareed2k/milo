@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/milo/util"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/jinzhu/gorm"
 )
 
 const (
@@ -11,7 +12,7 @@ const (
 )
 
 type User struct {
-	ID                uint   `json:"id" gorm:"primary_key"`
+	gorm.Model
 	Email             string `json:"email" validate:"required,email"`
 	Username          string `json:"username" validate:"required,max=24,alphanum" gorm:"not null;unique_index"`
 	Password          string `json:"password,omitempty" validate:"required,min=6,max=32" gorm:"-"`
