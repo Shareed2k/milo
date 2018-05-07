@@ -13,12 +13,12 @@ const (
 
 type User struct {
 	gorm.Model
-	Email             string `json:"email" validate:"required,email"`
-	Username          string `json:"username" validate:"required,max=24,alphanum" gorm:"not null;unique_index"`
-	Password          string `json:"password,omitempty" validate:"required,min=6,max=32" gorm:"-"`
-	Role              string `json:"role" validate:"required" gorm:"not null"`
+	Email             string `json:"email" form:"name" validate:"required,email"`
+	Username          string `json:"username" form:"username" validate:"required,max=24,alphanum" gorm:"not null;unique_index"`
+	Password          string `json:"password,omitempty" form:"password" validate:"required,min=6,max=32" gorm:"-"`
+	Role              string `json:"role" form:"role" validate:"required" gorm:"not null"`
 	EncryptedPassword []byte `json:"-" gorm:"not null"`
-	APIToken          string `json:"api_token" gorm:"not null;index"`
+	APIToken          string `json:"api_token" form:"api_token" gorm:"not null;index"`
 }
 
 type UserList struct {

@@ -1,12 +1,13 @@
 package minion
 
 import (
+	"errors"
 	"fmt"
 	"github.com/milo/internal"
 	"github.com/urfave/cli"
 )
 
-func New(st internal.Settings) cli.Command {
+func New() cli.Command {
 	s := NewSettings()
 
 	return cli.Command{
@@ -19,18 +20,23 @@ func New(st internal.Settings) cli.Command {
 				Usage: "join to master",
 				Flags: s.InitFlags(),
 				Action: func(c *cli.Context) error {
-					fmt.Println(st)
+					var config interface{}
+					var ok bool
+					if config, ok = c.App.Metadata["settings"]; !ok {
+						return errors.New("settings is missing")
+					}
+					settings := config.(internal.Settings).GetOptions()
 
-					client := internal.NewGrpcClient(st)
+					client := internal.NewGrpcClient(settings)
 					client.ConnectToServer(c.Args().First())
 
-					store := internal.NewKeyValueStore(st)
+					store := internal.NewKeyValueStore(settings)
 
 					request := &internal.JoinRequest{
 						Token: s.GetOptions().Token,
 						Minion: &internal.JoinRequest_Minion{
-							PrivateAddr: st.GetOptions().BindAddr,
-							PublicAddr: "122.45.65.12",
+							PrivateAddr: settings.GetOptions().BindAddr,
+							PublicAddr:  "122.45.65.12",
 						},
 					}
 
@@ -39,6 +45,7 @@ func New(st internal.Settings) cli.Command {
 					response, err := client.Join(request)
 
 					if err != nil {
+						println(err.Error())
 						return err
 					}
 

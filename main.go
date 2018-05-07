@@ -19,7 +19,14 @@ func main() {
 	s := internal.NewSettings()
 
 	app.Flags = s.InitFlags()
-	app.Commands = command.Map(s)
+	app.Commands = command.Map()
+	app.Before = func(c *cli.Context) error {
+		s.ReadConfig()
+		meta := make(map[string]interface{})
+		meta["settings"] = s
+		app.Metadata = meta
+		return nil
+	}
 
 	app.Action = func(ctx *cli.Context) {
 		c := internal.NewCore(s)

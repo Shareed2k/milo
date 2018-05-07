@@ -1,10 +1,16 @@
 package internal
 
-import "github.com/urfave/cli"
+import (
+	"github.com/urfave/cli"
+	"os"
+	"encoding/json"
+	"github.com/imdario/mergo"
+)
 
 type Settings interface {
 	InitFlags() []cli.Flag
 	GetOptions() *settings
+	ReadConfig() error
 }
 
 type settings struct {
@@ -63,4 +69,26 @@ func (s *settings) InitFlags() []cli.Flag {
 
 func (s *settings) GetOptions() *settings {
 	return s
+}
+
+func (s *settings) ReadConfig() error {
+	// Set Settings from config file
+	if s.ConfigFilePath != "" {
+		var configFileSettings settings
+		configFile, err := os.Open(s.ConfigFilePath)
+		defer configFile.Close()
+
+		if err != nil {
+			return err
+		}
+		if err := json.NewDecoder(configFile).Decode(&configFileSettings); err != nil {
+			return err
+		}
+		// Merge in command line settings (which overwrite respective config file settings)
+		if err := mergo.Merge(s, configFileSettings); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

@@ -2,15 +2,15 @@ package internal
 
 import (
 	"github.com/GeertJohan/go.rice"
+	_ "github.com/casbin/casbin"
+	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
+	_ "github.com/labstack/echo-contrib/casbin"
 	"github.com/labstack/echo/middleware"
-	"github.com/milo/internal/api"
 	"html/template"
 	"io"
 	"net"
 	"net/http"
-	_ "github.com/casbin/casbin"
-	_ "github.com/labstack/echo-contrib/casbin"
 )
 
 type HttpServer interface {
@@ -27,25 +27,34 @@ type TemplateRenderer struct {
 	templates *template.Template
 }
 
+type MiloContext struct {
+	echo.Context
+	Core
+}
+
 func NewHttp(c Core) HttpServer {
 	e := echo.New()
-	cnt := e.AcquireContext()
-	cnt.Set("config", c.GetSettings().GetOptions())
-	e.ReleaseContext(cnt)
+	e.Validator = &CustomValidator{validator: validator.New()}
 	return &httpServer{Core: c, Echo: e}
 }
 
 func (h *httpServer) StartServer(l net.Listener) {
 	// Middleware
+	h.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			cc := &MiloContext{Context: c, Core: h.Core}
+			return next(cc)
+		}
+	})
 	h.Use(middleware.Logger())
 	h.Use(middleware.Recover())
 	h.Use(middleware.Gzip())
 	h.Use(middleware.CORS())
-	h.Use(middleware.CSRF())
+	//h.Use(middleware.CSRF())
 	//h.Use(casbinmw.Middleware(casbin.NewEnforcer("./configs/auth_model.conf", "./configs/policy.csv")))
 
 	// Routes
-	api.NewRoutes(h.Echo)
+	NewRoutes(h.Echo)
 
 	box := rice.MustFindBox("../ui/dist")
 	tmplBox := rice.MustFindBox("../ui/src/tmpl")
@@ -83,4 +92,12 @@ func (h *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 	}
 
 	return h.templates.ExecuteTemplate(w, name, data)
+}
+
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
 }

@@ -50,7 +50,10 @@ func (m *master) InitBootstrap() error {
 	serverRepo, _ := CreateRepository("server", m.Core)
 	m.userRepo = userRepo.(UserRepository)
 	m.serverRepo = serverRepo.(ServerRepository)
-	m.userRepo.DetectOrCreateAdmin()
+
+	if err := m.userRepo.DetectOrCreateAdmin(); err != nil {
+		return err
+	}
 
 	// Create a cmux object.
 	tcpm := cmux.New(list)

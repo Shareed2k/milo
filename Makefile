@@ -22,7 +22,7 @@ ui:
 grpc:
 	protoc -I=./grpc/ --go_out=plugins=grpc:./internal/ ./grpc/*.proto
 
-build: bindata
+build:
 	CGO_ENABLED=1 GOOS=${GOOS} GOARCH=${GOARCH} go build \
 		-ldflags "-s -w -X ${PROJECT}/internal.Release=${RELEASE} \
 		-X ${PROJECT}/internal.Commit=${COMMIT} -X ${PROJECT}/internal.BuildTime=${BUILD_TIME}" \

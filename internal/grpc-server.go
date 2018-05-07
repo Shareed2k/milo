@@ -1,11 +1,11 @@
 package internal
 
 import (
-	"fmt"
 	"github.com/milo/db/models"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"net"
+	"github.com/pkg/errors"
 )
 
 type GrpcServer interface {
@@ -30,8 +30,6 @@ func (s *server) StartServer(l net.Listener) {
 }
 
 func (s *server) Join(ctx context.Context, in *JoinRequest) (*JoinResponse, error) {
-	fmt.Println(in)
-
 	model := &models.Server{
 		PrivateIp:   in.GetMinion().GetPrivateAddr(),
 		PublicIp:    in.GetMinion().PublicAddr,
@@ -39,7 +37,10 @@ func (s *server) Join(ctx context.Context, in *JoinRequest) (*JoinResponse, erro
 	}
 
 	repo := s.GetMaster().GetServerRepository()
-	repo.Create(model)
+
+	if _, err := repo.Create(model); err != nil {
+		return nil, errors.New("Minion is already registered")
+	}
 
 	return &JoinResponse{
 		Uuid:    model.Uuid,

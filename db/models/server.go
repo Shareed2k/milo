@@ -11,7 +11,7 @@ type Server struct {
 	Uuid        string `json:"uuid" validate:"required" gorm:"not null;unique_index"`
 	Description string `json:"description"`
 	PrivateIp   string `json:"private_ip" validate:"required" gorm:"not null;index"`
-	PublicIp    string `json:"public_ip" validate:"required" gorm:"not null;index"`
+	PublicIp    string `json:"public_ip" validate:"required" gorm:"not null;unique_index"`
 }
 
 type ServerList struct {

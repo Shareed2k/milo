@@ -1,10 +1,8 @@
 package internal
 
 import (
-	"encoding/json"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/imdario/mergo"
 	"os"
 )
 
@@ -38,7 +36,7 @@ func NewCore(s Settings) Core {
 	}()
 
 	// Read config
-	if err := c.readConfig(); err != nil {
+	if err := s.ReadConfig(); err != nil {
 		panic(err)
 	}
 
@@ -105,26 +103,4 @@ func (f *LogFormatter) Format(entry *log.Entry) ([]byte, error) {
 	entry.Message = fmt.Sprintf("%s: %s", f.prefix, entry.Message)
 	tf := log.TextFormatter{}
 	return tf.Format(entry)
-}
-
-func (c *core) readConfig() error {
-	// Set Settings from config file
-	if c.ConfigFilePath != "" {
-		var configFileSettings settings
-		configFile, err := os.Open(c.ConfigFilePath)
-		defer configFile.Close()
-
-		if err != nil {
-			return err
-		}
-		if err := json.NewDecoder(configFile).Decode(&configFileSettings); err != nil {
-			return err
-		}
-		// Merge in command line settings (which overwrite respective config file settings)
-		if err := mergo.Merge(c.settings, configFileSettings); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

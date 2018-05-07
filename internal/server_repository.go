@@ -1,9 +1,11 @@
 package internal
 
-import "github.com/milo/db/models"
+import (
+	"github.com/milo/db/models"
+)
 
 type ServerRepository interface {
-	Create(s *models.Server) uint
+	Create(s *models.Server) (uint, error)
 }
 
 type serverRepo struct {
@@ -16,8 +18,10 @@ func NewServerRepository(c Core) (Repository, error) {
 	return &serverRepo{c, db}, nil
 }
 
-func (r *serverRepo) Create(s *models.Server) uint {
-	r.DB.Create(s)
+func (r *serverRepo) Create(s *models.Server) (uint, error) {
+	if err := r.DB.Create(s).Error; err != nil {
+		return 0, err
+	}
 
-	return s.ID
+	return s.ID, nil
 }
