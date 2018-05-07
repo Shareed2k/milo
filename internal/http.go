@@ -50,7 +50,7 @@ func (h *httpServer) StartServer(l net.Listener) {
 	h.Use(middleware.Recover())
 	h.Use(middleware.Gzip())
 	h.Use(middleware.CORS())
-	//h.Use(middleware.CSRF())
+	h.Use(middleware.CSRF())
 	//h.Use(casbinmw.Middleware(casbin.NewEnforcer("./configs/auth_model.conf", "./configs/policy.csv")))
 
 	// Routes

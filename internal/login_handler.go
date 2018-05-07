@@ -13,6 +13,11 @@ type User struct {
 	Password string `json:"password" form:"password" validate:"required"`
 }
 
+type Response struct {
+	*models.User
+	Token string `json:"token"`
+}
+
 func login(c *MiloContext) (err error) {
 	db := c.GetMaster().GetDatabase()
 
@@ -31,7 +36,7 @@ func login(c *MiloContext) (err error) {
 		"message": "We could not verify those credentials.",
 	}
 
-	if err := db.First(user, "email = ?", u.Email); err != nil {
+	if err := db.First(user, "email = ?", u.Email).Error; err != nil {
 		return c.JSON(http.StatusUnauthorized, errorMsg)
 	}
 
@@ -60,8 +65,9 @@ func login(c *MiloContext) (err error) {
 		cookie.Expires = time.Now().Add(timeExp)
 		c.SetCookie(cookie)
 
-		return c.JSON(http.StatusOK, map[string]string{
-			"token": t,
+		return c.JSON(http.StatusOK, &Response{
+			User: user,
+			Token: t,
 		})
 	}
 

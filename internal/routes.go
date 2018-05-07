@@ -6,12 +6,12 @@ import (
 )
 
 func NewRoutes(e *echo.Echo) {
+	e.POST("/login", simpleHandler(login))
+
 	// api
 	api := e.Group("/api")
 	//api.Use(middleware.JWT([]byte("secret")))
-
-	//api.POST("/login", restrictedHandler(login))
-	api.POST("/login", simpleHandler(login))
+	api.GET("/servers", restrictedHandler(servers))
 }
 
 func simpleHandler(fn func(*MiloContext) error) echo.HandlerFunc {

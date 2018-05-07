@@ -3,9 +3,13 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import store from './store'
 import Vuetify from 'vuetify'
+import VeeValidate from 'vee-validate'
+import {axios} from './bootstrap'
 import 'vuetify/dist/vuetify.min.css'
 
+Vue.use(VeeValidate, { fieldsBagName: 'veeFields', errorBagName: 'veeErrors' })
 Vue.use(Vuetify, { theme: {
   primary: '#ee44aa',
   secondary: '#424242',
@@ -18,9 +22,12 @@ Vue.use(Vuetify, { theme: {
 
 Vue.config.productionTip = false
 
+Vue.http = Vue.prototype.$http = axios
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
+  store,
   router,
   components: { App },
   template: '<App/>'

@@ -29,16 +29,16 @@ func (r *userRepo) DetectOrCreateAdmin() error {
 			Role:     models.UserRoleAdmin,
 		}
 
-		if err := r.DB.First(new(models.User), "username = ?", support.Username).Error; err != nil {
+		if err := r.DB.First(new(models.User), "username = ?", support.Username).Error; err == nil {
 			// Already have an support
 			fmt.Println("Support User Already Configured...")
-			return err
+			return nil
 		}
 		r.DB.Create(support)
 	}
-	if err := r.DB.First(new(models.User), "role = ?", models.UserRoleAdmin).Error; err != nil {
+	if err := r.DB.First(new(models.User), "role = ?", models.UserRoleAdmin).Error; err == nil {
 		// Already have an admin
-		return err
+		return nil
 	}
 
 	fmt.Println("No Admin detected, creating new and printing credentials:")
