@@ -32,5 +32,7 @@ func (s *minionServer) PassRule(ctx context.Context, in *RuleRequest) (*RuleResp
 }
 
 func (s *minionServer) GetStats(ctx context.Context, in *StatsRequest) (*StatsResponse, error) {
-	return nil, nil
+	return &StatsResponse{
+		Message: "jopa melkogo bobra",
+	}, nil
 }

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"os"
-	"encoding/json"
-	"github.com/imdario/mergo"
 )
 
 type Core interface {
@@ -38,7 +36,7 @@ func NewCore(s Settings) Core {
 	}()
 
 	// Read config
-	if err := c.ReadConfig(); err != nil {
+	if err := s.ReadConfig(); err != nil {
 		panic(err)
 	}
 
@@ -59,9 +57,11 @@ func (c *core) initializeForeground() error {
 	c.log.SetLevel(log.InfoLevel | log.DebugLevel | log.ErrorLevel)
 
 	//Set Operator
-	if c.MasterMode == true {
+	if c.MasterMode {
 		c.master = NewMaster(c)
-	} else {
+	}
+
+	if c.MinionMode {
 		c.minion = NewMinion(c)
 	}
 
@@ -73,7 +73,9 @@ func (c *core) initBootstrap() error {
 
 	if c.MasterMode == true {
 		err = c.master.InitBootstrap()
-	} else {
+	}
+
+	if c.MinionMode {
 		err = c.minion.InitBootstrap()
 	}
 
@@ -105,29 +107,4 @@ func (f *LogFormatter) Format(entry *log.Entry) ([]byte, error) {
 	entry.Message = fmt.Sprintf("%s: %s", f.prefix, entry.Message)
 	tf := log.TextFormatter{}
 	return tf.Format(entry)
-}
-
-func (c *core) ReadConfig() error {
-	// Set Settings from config file
-	if c.ConfigFilePath != "" {
-		var configFileSettings Settings
-		configFile, err := os.Open(c.ConfigFilePath)
-		defer configFile.Close()
-
-		if err != nil {
-			return err
-		}
-		if err := json.NewDecoder(configFile).Decode(&configFileSettings); err != nil {
-			return err
-		}
-		// Merge in command line settings (which overwrite respective config file settings)
-		if err := mergo.Merge(&c.Settings, configFileSettings); err != nil {
-			return err
-		}
-
-		fmt.Println("tmp", configFileSettings)
-		fmt.Println("original", c.Settings)
-	}
-
-	return nil
 }

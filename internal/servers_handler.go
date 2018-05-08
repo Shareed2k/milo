@@ -30,3 +30,15 @@ func servers(c *MiloContext) (err error) {
 		"items":     servers,
 	})
 }
+
+func serverInfo(c *MiloContext) (err error) {
+	minionClient := NewMinionGrpcClient(c.GetSettings())
+	defer minionClient.Close()
+
+	minionClient.ConnectToServer("127.0.0.1", "8552")
+	response, err := minionClient.GetStats(&StatsRequest{})
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": response.Message,
+	})
+}

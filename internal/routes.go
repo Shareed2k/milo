@@ -44,6 +44,7 @@ func NewRoutes(e *echo.Echo) {
 	})
 	api.GET("/bootdata", routeHandler(bootdata))
 	api.GET("/servers", routeHandler(servers))
+	api.GET("/servers/info", routeHandler(serverInfo))
 }
 
 func routeHandler(fn func(*MiloContext) error) echo.HandlerFunc {

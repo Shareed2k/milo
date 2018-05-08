@@ -24,9 +24,8 @@ func NewGrpcClient(s Settings) GrpcClient {
 
 func (s *client) ConnectToServer(ip string) {
 	var err error
-	settings := s
 
-	s.connection, err = grpc.Dial(fmt.Sprintf("%s:%s", ip, settings.GrpcPort), grpc.WithInsecure())
+	s.connection, err = grpc.Dial(fmt.Sprintf("%s:%s", ip, s.GrpcPort), grpc.WithInsecure())
 
 	if err != nil {
 		panic(err)

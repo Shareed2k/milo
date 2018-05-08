@@ -4,7 +4,7 @@
   block content
     v-data-table.elevation-1(:headers='headers', :items='items', hide-actions='')
       template(slot='items', slot-scope='props')
-        td {{ props.item.ID }}
+        td(@click="getInfo") {{ props.item.ID }}
         td {{ props.item.uuid }}
         td {{ props.item.public_ip }}
         td {{ props.item.private_ip }}
@@ -31,6 +31,13 @@
       ],
       items: []
     }),
+
+    methods: {
+      getInfo: function () {
+        this.$http.get('/api/servers/info')
+          .then(r => { this.items = r.data })
+      }
+    },
 
     mounted () {
       this.$http.get('/api/servers')

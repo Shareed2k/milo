@@ -2,7 +2,6 @@ package internal
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/creasty/defaults"
 	"github.com/imdario/mergo"
 	"github.com/urfave/cli"
@@ -16,14 +15,14 @@ type Settings struct {
 	PrivateAddr     string `json:"private_addr"`
 	MasterAddr      string `json:"master_addr"`
 	NodeName        string `json:"node_name"`
-	HttpPort        int    `json:"http_port"`
-	GrpcPort        string `json:"grpc_port"`
+	HttpPort        string `json:"http_port" default:"8080"`
+	GrpcPort        string `json:"grpc_port" default:"8551"`
 	MasterMode      bool   `json:"master"`
 	MinionMode      bool   `json:"minion"`
 }
 
 func NewSettings() Settings {
-	return Settings{MasterMode: false, MinionMode: true}
+	return Settings{MasterMode: false, MinionMode: false}
 }
 
 func (s *Settings) InitFlags() []cli.Flag {
@@ -47,7 +46,7 @@ func (s *Settings) InitFlags() []cli.Flag {
 			Usage:       "minion mode",
 			Destination: &s.MinionMode,
 		},
-		cli.IntFlag{
+		cli.StringFlag{
 			Name:        "http_port",
 			EnvVar:      "HTTP_PORT",
 			Usage:       "http port",
@@ -85,9 +84,6 @@ func (s *Settings) ReadConfig() error {
 		if err := defaults.Set(s); err != nil {
 			return err
 		}
-
-		fmt.Println("tmp", configFileSettings)
-		fmt.Println("original", s)
 	}
 
 	return nil

@@ -35,7 +35,7 @@ func NewMaster(c Core) MasterOperator {
 func (m *master) InitBootstrap() error {
 	settings := m.GetSettings()
 	list, err := net.Listen("tcp", fmt.Sprintf(":%s", settings.GrpcPort))
-	httpList, err := net.Listen("tcp", fmt.Sprintf(":%d", settings.HttpPort))
+	httpList, err := net.Listen("tcp", fmt.Sprintf(":%s", settings.HttpPort))
 
 	if err != nil {
 		return err
