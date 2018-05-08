@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package internal;
+
+service Master {
+    rpc Join (JoinRequest) returns (JoinResponse) {}
+    rpc GetRuleList (RuleListRequest) returns (RuleListResponse) {}
+}
+
+message JoinRequest {
+    string token = 1;
+
+    message Minion {
+        string PrivateAddr = 1;
+        string PublicAddr = 2;
+    }
+
+    Minion minion = 2;
+}
+
+message JoinResponse {
+    string uuid = 1;
+    string message = 2;
+}
+
+message RuleListRequest {
+    string uuid = 1;
+    int64 num = 2;
+    string cursor = 3;
+}
+
+
+message RuleListResponse {
+
+    message Rule {
+
+    }
+
+    repeated Rule Rules = 1;
+    string Cursor = 2;
+}

@@ -48,10 +48,6 @@ func (s *server) Join(ctx context.Context, in *JoinRequest) (*JoinResponse, erro
 	}, nil
 }
 
-func (s *server) StreamRule(in *Rule, str Master_StreamRuleServer) error {
-	return nil
-}
-
-func (s *server) GetListRule(ctx context.Context, in *FetchRequest) (*ListRules, error) {
+func (s *server) GetRuleList(ctx context.Context, in *RuleListRequest) (*RuleListResponse, error) {
 	return nil, nil
 }

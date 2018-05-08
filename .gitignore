@@ -6,3 +6,4 @@
 /internal/rice-box.go
 /ui/node_modules/
 /test.db
+/minion_config.json

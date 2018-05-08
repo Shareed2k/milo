@@ -4,6 +4,8 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"os"
+	"encoding/json"
+	"github.com/imdario/mergo"
 )
 
 type Core interface {
@@ -19,14 +21,14 @@ type LogFormatter struct {
 }
 
 type core struct {
-	*settings
+	Settings
 	log    *log.Logger
 	master MasterOperator
 	minion MinionOperator
 }
 
 func NewCore(s Settings) Core {
-	c := &core{settings: s.GetOptions()}
+	c := &core{Settings: s}
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -36,7 +38,7 @@ func NewCore(s Settings) Core {
 	}()
 
 	// Read config
-	if err := s.ReadConfig(); err != nil {
+	if err := c.ReadConfig(); err != nil {
 		panic(err)
 	}
 
@@ -79,7 +81,7 @@ func (c *core) initBootstrap() error {
 }
 
 func (c *core) GetSettings() Settings {
-	return c.settings
+	return c.Settings
 }
 
 func (c *core) OnStop() {
@@ -103,4 +105,29 @@ func (f *LogFormatter) Format(entry *log.Entry) ([]byte, error) {
 	entry.Message = fmt.Sprintf("%s: %s", f.prefix, entry.Message)
 	tf := log.TextFormatter{}
 	return tf.Format(entry)
+}
+
+func (c *core) ReadConfig() error {
+	// Set Settings from config file
+	if c.ConfigFilePath != "" {
+		var configFileSettings Settings
+		configFile, err := os.Open(c.ConfigFilePath)
+		defer configFile.Close()
+
+		if err != nil {
+			return err
+		}
+		if err := json.NewDecoder(configFile).Decode(&configFileSettings); err != nil {
+			return err
+		}
+		// Merge in command line settings (which overwrite respective config file settings)
+		if err := mergo.Merge(&c.Settings, configFileSettings); err != nil {
+			return err
+		}
+
+		fmt.Println("tmp", configFileSettings)
+		fmt.Println("original", c.Settings)
+	}
+
+	return nil
 }

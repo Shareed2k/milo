@@ -67,7 +67,13 @@
             if (result) {
               this.valid = result
               this.$http.post('/login', this.request)
-                .then(r => this.setUser(r.data).then(() => this.$router.push('/')))
+                .then(r =>
+                  this.setUser(r.data)
+                    .then(u => {
+                      this.$http.defaults.headers.common['Authorization'] = `Bearer ${u.token}`
+                    })
+                    .then(() => this.$router.push('/'))
+                )
             }
           })
       }

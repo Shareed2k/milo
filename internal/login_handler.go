@@ -2,6 +2,7 @@ package internal
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"github.com/labstack/echo"
 	"github.com/milo/db/models"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -13,9 +14,10 @@ type User struct {
 	Password string `json:"password" form:"password" validate:"required"`
 }
 
-type Response struct {
-	*models.User
-	Token string `json:"token"`
+type jwtClaims struct {
+	UserId uint   `json:"user_id"`
+	Role   string `json:"role"`
+	jwt.StandardClaims
 }
 
 func login(c *MiloContext) (err error) {
@@ -41,16 +43,19 @@ func login(c *MiloContext) (err error) {
 	}
 
 	if bcrypt.CompareHashAndPassword(user.EncryptedPassword, []byte(u.Password)) == nil {
-		// Create token
-		token := jwt.New(jwt.SigningMethodHS256)
-
 		timeExp := time.Hour * 1
 
 		// Set claims
-		claims := token.Claims.(jwt.MapClaims)
-		claims["user_id"] = user.ID
-		claims["role"] = user.Role
-		claims["exp"] = time.Now().Add(timeExp).Unix()
+		claims := &jwtClaims{
+			UserId: user.ID,
+			Role:   user.Role,
+			StandardClaims: jwt.StandardClaims{
+				ExpiresAt: time.Now().Add(timeExp).Unix(),
+			},
+		}
+
+		// Create token
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 		// Generate encoded token and send it as response.
 		t, err := token.SignedString([]byte("secret"))
@@ -60,14 +65,14 @@ func login(c *MiloContext) (err error) {
 
 		// Create cookie for client side
 		cookie := new(http.Cookie)
-		cookie.Name = "token"
+		cookie.Name = "milo_token"
 		cookie.Value = t
 		cookie.Expires = time.Now().Add(timeExp)
 		c.SetCookie(cookie)
 
-		return c.JSON(http.StatusOK, &Response{
-			User: user,
-			Token: t,
+		return c.JSON(http.StatusOK, echo.Map{
+			"user":  user,
+			"token": t,
 		})
 	}
 

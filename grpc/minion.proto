@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package internal;
+
+import "google/protobuf/struct.proto";
+
+service Minion {
+    rpc PassRule (RuleRequest) returns (RuleResponse) {}
+    rpc GetStats (StatsRequest) returns (StatsResponse) {}
+}
+
+message RuleRequest {
+    google.protobuf.Struct extra = 1;
+}
+
+message RuleResponse {
+    string status = 1;
+}
+
+message StatsRequest {
+
+}
+
+message StatsResponse {
+    string message = 1;
+}

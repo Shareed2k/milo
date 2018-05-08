@@ -11,7 +11,7 @@ import 'vuetify/dist/vuetify.min.css'
 
 Vue.use(VeeValidate, { fieldsBagName: 'veeFields', errorBagName: 'veeErrors' })
 Vue.use(Vuetify, { theme: {
-  primary: '#ee44aa',
+  primary: '#09a5ee',
   secondary: '#424242',
   accent: '#82B1FF',
   error: '#FF5252',

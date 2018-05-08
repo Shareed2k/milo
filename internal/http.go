@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo"
 	_ "github.com/labstack/echo-contrib/casbin"
 	"github.com/labstack/echo/middleware"
+	"github.com/milo/db/models"
 	"html/template"
 	"io"
 	"net"
@@ -30,6 +31,7 @@ type TemplateRenderer struct {
 type MiloContext struct {
 	echo.Context
 	Core
+	user *models.User
 }
 
 func NewHttp(c Core) HttpServer {
@@ -42,8 +44,10 @@ func (h *httpServer) StartServer(l net.Listener) {
 	// Middleware
 	h.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			cc := &MiloContext{Context: c, Core: h.Core}
-			return next(cc)
+			return next(&MiloContext{
+				Context: c,
+				Core: h.Core,
+			})
 		}
 	})
 	h.Use(middleware.Logger())
@@ -52,9 +56,6 @@ func (h *httpServer) StartServer(l net.Listener) {
 	h.Use(middleware.CORS())
 	h.Use(middleware.CSRF())
 	//h.Use(casbinmw.Middleware(casbin.NewEnforcer("./configs/auth_model.conf", "./configs/policy.csv")))
-
-	// Routes
-	NewRoutes(h.Echo)
 
 	box := rice.MustFindBox("../ui/dist")
 	tmplBox := rice.MustFindBox("../ui/src/tmpl")
@@ -74,11 +75,8 @@ func (h *httpServer) StartServer(l net.Listener) {
 	}
 	h.Renderer = renderer
 
-	h.GET("/", func(c echo.Context) error {
-		return c.Render(http.StatusOK, "index", map[string]interface{}{
-			"csrf": c.Get("csrf"),
-		})
-	})
+	// Routes
+	NewRoutes(h.Echo)
 
 	// Start Server
 	h.Server.Serve(l)

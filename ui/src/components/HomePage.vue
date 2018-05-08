@@ -4,12 +4,10 @@
   block content
     v-data-table.elevation-1(:headers='headers', :items='items', hide-actions='')
       template(slot='items', slot-scope='props')
-        td {{ props.item.name }}
-        td.text-xs-right {{ props.item.calories }}
-        td.text-xs-right {{ props.item.fat }}
-        td.text-xs-right {{ props.item.carbs }}
-        td.text-xs-right {{ props.item.protein }}
-        td.text-xs-right {{ props.item.iron }}
+        td {{ props.item.ID }}
+        td {{ props.item.uuid }}
+        td {{ props.item.public_ip }}
+        td {{ props.item.private_ip }}
 </template>
 
 <script>
@@ -22,19 +20,22 @@
     data: () => ({
       headers: [
         {
-          text: 'Dessert (100g serving)',
+          text: 'ID',
           align: 'left',
           sortable: false,
-          value: 'name'
+          value: 'ID'
         },
-        { text: 'Calories', value: 'calories' },
-        { text: 'Fat (g)', value: 'fat' },
-        { text: 'Carbs (g)', value: 'carbs' },
-        { text: 'Protein (g)', value: 'protein' },
-        { text: 'Iron (%)', value: 'iron' }
+        { text: 'UUID', value: 'uuid' },
+        { text: 'Public IP', value: 'public_ip' },
+        { text: 'Private IP', value: 'private_ip' }
       ],
       items: []
-    })
+    }),
+
+    mounted () {
+      this.$http.get('/api/servers')
+        .then(r => { this.items = r.data.items })
+    }
   }
 </script>
 

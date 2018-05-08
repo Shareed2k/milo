@@ -5,12 +5,12 @@ const defaultUser = {
   role: '',
   email: '',
   api_token: '',
-  token: '',
   teams: []
 }
 
 const state = {
   user: defaultUser,
+  token: '',
   isAuthorized: false
 }
 
@@ -55,7 +55,7 @@ const actions = {
 const getters = {
   isAuthorized: state => state.isAuthorized,
   getUser: state => state.user,
-  getToken: state => state.user.token,
+  getToken: state => state.token,
   getTeamByName: state => name => _.filter(state.user.teams, team => team.name === name),
   getTeamByUuid: state => uuid => _.filter(state.user.teams, team => team.uuid === uuid)
 }

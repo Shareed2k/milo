@@ -25,7 +25,7 @@ func New() cli.Command {
 					if config, ok = c.App.Metadata["settings"]; !ok {
 						return errors.New("settings is missing")
 					}
-					settings := config.(internal.Settings).GetOptions()
+					settings := config.(internal.Settings)
 
 					client := internal.NewGrpcClient(settings)
 					client.ConnectToServer(c.Args().First())
@@ -35,7 +35,7 @@ func New() cli.Command {
 					request := &internal.JoinRequest{
 						Token: s.GetOptions().Token,
 						Minion: &internal.JoinRequest_Minion{
-							PrivateAddr: settings.GetOptions().BindAddr,
+							PrivateAddr: settings.BindAddr,
 							PublicAddr:  "122.45.65.12",
 						},
 					}

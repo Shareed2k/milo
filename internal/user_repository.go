@@ -21,7 +21,7 @@ func NewUserRepository(c Core) (Repository, error) {
 }
 
 func (r *userRepo) DetectOrCreateAdmin() error {
-	settings := r.core.GetSettings().GetOptions()
+	settings := r.core.GetSettings()
 	if settings.SupportPassword != "" {
 		support := &models.User{
 			Username: "support",

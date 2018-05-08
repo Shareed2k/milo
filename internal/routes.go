@@ -1,52 +1,53 @@
 package internal
 
 import (
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"github.com/milo/db/models"
+	"net/http"
 )
 
 func NewRoutes(e *echo.Echo) {
-	e.POST("/login", simpleHandler(login))
+	e.GET("/", func(c echo.Context) error {
+		return c.Render(http.StatusOK, "index", map[string]interface{}{
+			"csrf": c.Get("csrf"),
+		})
+	})
+	e.POST("/login", routeHandler(login))
 
 	// api
 	api := e.Group("/api")
-	//api.Use(middleware.JWT([]byte("secret")))
-	api.GET("/servers", restrictedHandler(servers))
+	config := middleware.JWTConfig{
+		Claims:     &jwtClaims{},
+		SigningKey: []byte("secret"),
+	}
+	api.Use(middleware.JWTWithConfig(config))
+	api.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			ctx := c.(*MiloContext)
+			user := &models.User{}
+
+			// Check if authorize header is passed, and validate if user exist
+			if token := c.Get("user"); token != nil {
+				claims := token.(*jwt.Token).Claims.(*jwtClaims)
+
+				if err := ctx.GetMaster().GetDatabase().First(user, claims.UserId).Error; err != nil {
+					return echo.ErrUnauthorized
+				}
+			}
+
+			ctx.user = user
+
+			return next(ctx)
+		}
+	})
+	api.GET("/bootdata", routeHandler(bootdata))
+	api.GET("/servers", routeHandler(servers))
 }
 
-func simpleHandler(fn func(*MiloContext) error) echo.HandlerFunc {
+func routeHandler(fn func(*MiloContext) error) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		return fn(ctx.(*MiloContext))
 	}
-}
-
-func restrictedHandler(fn func(*MiloContext, *models.User) error) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-		user := loadUser(ctx)
-
-		if user == nil {
-			return echo.ErrUnauthorized
-		}
-
-		return fn(ctx.(*MiloContext), user)
-	}
-}
-
-func loadUser(c echo.Context) *models.User {
-	user := new(models.User)
-
-	/*t := c.Get("user").(*jwt.Token)
-	claims := t.Claims.(jwt.MapClaims)
-
-	id, err := internal.ParseID(fmt.Sprint(claims["user_id"].(float64)))
-
-	if err != nil {
-		return nil
-	}
-
-	if err := co.Users.Get(id, user); err != nil {
-		return nil
-	}*/
-
-	return user
 }
