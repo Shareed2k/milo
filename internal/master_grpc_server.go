@@ -9,7 +9,7 @@ import (
 )
 
 type GrpcServer interface {
-	StartServer(l net.Listener)
+	StartServer(l net.Listener) error
 }
 
 type server struct {
@@ -22,11 +22,11 @@ func NewGrpcServer(c Core) MasterServer {
 	}
 }
 
-func (s *server) StartServer(l net.Listener) {
+func (s *server) StartServer(l net.Listener) error {
 	server := grpc.NewServer()
 	RegisterMasterServer(server, s)
 
-	server.Serve(l)
+	return server.Serve(l)
 }
 
 func (s *server) Join(ctx context.Context, in *JoinRequest) (*JoinResponse, error) {

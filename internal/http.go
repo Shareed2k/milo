@@ -15,7 +15,7 @@ import (
 )
 
 type HttpServer interface {
-	StartServer(l net.Listener)
+	StartServer(l net.Listener) error
 }
 
 type httpServer struct {
@@ -40,7 +40,7 @@ func NewHttp(c Core) HttpServer {
 	return &httpServer{Core: c, Echo: e}
 }
 
-func (h *httpServer) StartServer(l net.Listener) {
+func (h *httpServer) StartServer(l net.Listener) error {
 	// Middleware
 	h.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -79,7 +79,7 @@ func (h *httpServer) StartServer(l net.Listener) {
 	NewRoutes(h.Echo)
 
 	// Start Server
-	h.Server.Serve(l)
+	return h.Server.Serve(l)
 }
 
 // Render renders a template document

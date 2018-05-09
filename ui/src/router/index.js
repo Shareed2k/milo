@@ -15,6 +15,22 @@ const router = new Router({
       }
     },
     {
+      path: '/regions',
+      name: 'RegionPage',
+      component: require('@/components/RegionPage').default,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/datacenters',
+      name: 'DataCenterPage',
+      component: require('@/components/DataCenterPage').default,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
       path: '/login',
       name: 'LoginPage',
       component: require('@/components/LoginPage').default,

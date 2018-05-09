@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func servers(c *MiloContext) (err error) {
+func indexServer(c *MiloContext) (err error) {
 	db := c.GetMaster().GetDatabase()
 
 	servers := []models.Server{}
@@ -37,6 +37,12 @@ func serverInfo(c *MiloContext) (err error) {
 
 	minionClient.ConnectToServer("127.0.0.1", "8552")
 	response, err := minionClient.GetStats(&StatsRequest{})
+
+	if err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, echo.Map{
+			"errors": err.Error(),
+		})
+	}
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"info": response.Message,

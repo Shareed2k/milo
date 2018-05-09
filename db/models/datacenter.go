@@ -8,13 +8,12 @@ import (
 
 type DataCenter struct {
 	gorm.Model
-	Uuid        string `json:"uuid" validate:"required" gorm:"not null;unique_index"`
-	Name        string `json:"name" form:"name" validate:"required"`
-	Description string `json:"description" form:"description"`
-}
-
-type DataCenterList struct {
-	Items []*DataCenter `json:"items"`
+	Uuid        string   `json:"uuid" gorm:"not null;unique_index"`
+	Name        string   `json:"name" form:"name" validate:"required"`
+	Provider    string   `json:"provider" form:"name" validate:"required"`
+	Description string   `json:"description" form:"description"`
+	RegionID    uint     `json:"region_id"`
+	Servers     []Server `json:"servers" gorm:"foreignkey:DataCenterID"`
 }
 
 func (m *DataCenter) BeforeCreate() error {

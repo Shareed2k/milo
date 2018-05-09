@@ -43,8 +43,9 @@ func (m *master) InitBootstrap() error {
 
 	// Run migration
 	m.AutoMigrate(&models.User{})
-	m.AutoMigrate(&models.Server{})
+	m.AutoMigrate(&models.Region{})
 	m.AutoMigrate(&models.DataCenter{})
+	m.AutoMigrate(&models.Server{})
 
 	// Create admin user
 	userRepo, _ := CreateRepository("user", m.Core)

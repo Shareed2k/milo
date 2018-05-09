@@ -35,7 +35,7 @@
     methods: {
       getInfo: function () {
         this.$http.get('/api/servers/info')
-          .then(r => { this.items = r.data })
+          .then(r => { console.log(r.data) })
       }
     },
 

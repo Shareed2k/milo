@@ -10,7 +10,7 @@ type Database struct {
 }
 
 func NewDatabase(settings Settings) *Database {
-	db, err := gorm.Open("sqlite3", "test.db")
+	db, err := gorm.Open("sqlite3", "test.db?cache=shared&mode=rwc")
 
 	if err != nil {
 		panic("failed to connect database")

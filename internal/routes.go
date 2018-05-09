@@ -43,8 +43,25 @@ func NewRoutes(e *echo.Echo) {
 		}
 	})
 	api.GET("/bootdata", routeHandler(bootdata))
-	api.GET("/servers", routeHandler(servers))
-	api.GET("/servers/info", routeHandler(serverInfo))
+
+	// regions
+	region := api.Group("/regions")
+	region.GET("", routeHandler(indexRegion))
+	region.GET("/:uuid", routeHandler(showRegion))
+	region.POST("", routeHandler(storeRegion))
+	region.DELETE("/:uuid", routeHandler(deleteRegion))
+	region.PUT("", routeHandler(updateRegion))
+
+	// datacenter
+	dc := api.Group("/datacenters")
+	dc.GET("", routeHandler(indexDataCenter))
+	dc.GET("/:uuid", routeHandler(showDataCenter))
+	dc.POST("", routeHandler(storeDataCenter))
+
+	// servers
+	server := api.Group("/servers")
+	server.GET("", routeHandler(indexServer))
+	server.GET("/info", routeHandler(serverInfo))
 }
 
 func routeHandler(fn func(*MiloContext) error) echo.HandlerFunc {

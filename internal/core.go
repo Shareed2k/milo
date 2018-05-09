@@ -71,7 +71,7 @@ func (c *core) initializeForeground() error {
 func (c *core) initBootstrap() error {
 	var err error
 
-	if c.MasterMode == true {
+	if c.MasterMode {
 		err = c.master.InitBootstrap()
 	}
 

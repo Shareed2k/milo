@@ -12,10 +12,23 @@
       clipped: false,
       drawer: true,
       fixed: false,
-      items: [{
-        icon: 'bubble_chart',
-        title: 'Inspire'
-      }],
+      menu: [
+        {
+          icon: 'restaurant',
+          title: 'Menu',
+          active: true,
+          items: [
+            {
+              title: 'Home',
+              link: '/'
+            },
+            {
+              title: 'Region',
+              link: '/regions'
+            },
+          ]
+        }
+      ],
       miniVariant: false,
       right: true,
       rightDrawer: false,
