@@ -26,6 +26,10 @@
               title: 'Region',
               link: '/regions'
             },
+            {
+              title: 'DataCenter',
+              link: '/datacenters'
+            }
           ]
         }
       ],

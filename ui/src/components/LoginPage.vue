@@ -35,7 +35,7 @@
                   )
               v-card-actions
                 v-spacer
-                v-btn(color='primary', @click.prevent='login', :disabled='!valid') Login
+                v-btn(color='primary', @click.prevent='login', :disabled='veeErrors.any()') Login
 </template>
 
 <script>
@@ -49,7 +49,6 @@
     },
 
     data: () => ({
-      valid: true,
       request: {
         email: '',
         password: ''
@@ -65,7 +64,6 @@
         this.$validator.validateAll()
           .then(result => {
             if (result) {
-              this.valid = result
               this.$http.post('/login', this.request)
                 .then(r =>
                   this.setUser(r.data)

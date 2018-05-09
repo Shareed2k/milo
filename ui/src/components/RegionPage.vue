@@ -3,7 +3,7 @@
 
   block content
     v-dialog(v-model='dialog', max-width='500px', persistent)
-      v-btn.mb-2(color='primary', dark='', slot='activator') New Item
+      v-btn.mb-2(color='primary', dark='', slot='activator') New Region
       v-card
         v-card-title
           span.headline {{ formTitle }}
@@ -80,7 +80,7 @@
 
     computed: {
       formTitle () {
-        return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+        return this.editedIndex === -1 ? 'New Region' : 'Edit Region'
       }
     },
 
