@@ -8,12 +8,14 @@ import (
 
 type DataCenter struct {
 	gorm.Model
-	Uuid        string   `json:"uuid" gorm:"not null;unique_index"`
-	Name        string   `json:"name" form:"name" validate:"required"`
-	Provider    string   `json:"provider" form:"name" validate:"required"`
-	Description string   `json:"description" form:"description"`
-	RegionID    uint     `json:"region_id"`
-	Servers     []Server `json:"servers" gorm:"foreignkey:DataCenterID"`
+	Uuid        string    `json:"uuid" gorm:"not null;unique_index"`
+	Name        string    `json:"name" form:"name" validate:"required"`
+	Description string    `json:"description" form:"description"`
+	RegionID    uint      `json:"region_id"`
+	ProviderID  uint      `json:"provider_id"`
+	Servers     []*Server `json:"servers" gorm:"foreignkey:DataCenterID"`
+	Provider    Provider  `json:"provider" validate:"-" gorm:"association_autoupdate:false;association_autocreate:false"`
+	Region      Region    `json:"region" validate:"-" gorm:"association_autoupdate:false;association_autocreate:false"`
 }
 
 func (m *DataCenter) BeforeCreate() error {

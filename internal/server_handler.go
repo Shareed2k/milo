@@ -46,5 +46,6 @@ func serverInfo(c *MiloContext) (err error) {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"info": response.Message,
+		"procs": response.Processes,
 	})
 }

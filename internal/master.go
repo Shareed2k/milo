@@ -43,6 +43,7 @@ func (m *master) InitBootstrap() error {
 
 	// Run migration
 	m.AutoMigrate(&models.User{})
+	m.AutoMigrate(&models.Provider{})
 	m.AutoMigrate(&models.Region{})
 	m.AutoMigrate(&models.DataCenter{})
 	m.AutoMigrate(&models.Server{})

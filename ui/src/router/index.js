@@ -23,6 +23,14 @@ const router = new Router({
       }
     },
     {
+      path: '/providers',
+      name: 'ProviderPage',
+      component: require('@/components/ProviderPage').default,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
       path: '/datacenters',
       name: 'DataCenterPage',
       component: require('@/components/DataCenterPage').default,

@@ -8,11 +8,13 @@ import (
 )
 
 func indexDataCenter(c *MiloContext) (err error) {
-	db := c.GetMaster().GetDatabase()
+	db := c.GetMaster().GetDatabase().DB
+
+	db.Set("gorm:auto_preload", true)
 
 	dc := new([]models.DataCenter)
 
-	store, err := paging.NewGORMStore(db.DB, dc)
+	store, err := paging.NewGORMStore(db.Preload("Provider").Preload("Region"), dc)
 	if err != nil {
 		return err
 	}
@@ -35,8 +37,11 @@ func showDataCenter(c *MiloContext) (err error) {
 	uuid := c.Param("uuid")
 
 	if uuid != "" {
+		db := c.GetMaster().GetDatabase().DB
+		db.Preload("Provider").Preload("Region")
+
 		dc := new(models.DataCenter)
-		if err := c.GetMaster().GetDatabase().First(dc, "uuid = ?", uuid).Error; err == nil {
+		if err := db.First(dc, "uuid = ?", uuid).Error; err == nil {
 			return c.JSON(http.StatusOK, dc)
 		}
 	}
@@ -56,11 +61,58 @@ func storeDataCenter(c *MiloContext) (err error) {
 		return c.JSON(http.StatusUnprocessableEntity, err.Error())
 	}
 
-	if err := c.GetMaster().GetDatabase().Create(dc).Error; err != nil {
+	db := c.GetMaster().GetDatabase().DB
+
+	if err := db.Create(dc).Error; err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, echo.Map{
 			"errors": err.Error(),
 		})
 	}
 
+	db.Preload("Provider").Preload("Region").First(dc)
+
 	return c.JSON(http.StatusCreated, dc)
+}
+
+
+func deleteDataCenter(c *MiloContext) (err error) {
+	uuid := c.Param("uuid")
+
+	if uuid != "" {
+		if err := c.GetMaster().GetDatabase().Where("uuid = ?", uuid).Delete(models.DataCenter{}).Error; err != nil {
+			return c.JSON(http.StatusUnprocessableEntity, echo.Map{
+				"errors": err.Error(),
+			})
+		}
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"uuid": uuid,
+	})
+}
+
+func updateDataCenter(c *MiloContext) (err error) {
+	dc := new(models.DataCenter)
+	if err = c.Bind(dc); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, echo.Map{
+			"errors": err.Error(),
+		})
+	}
+
+	if err = c.Validate(dc); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, echo.Map{
+			"errors": err.Error(),
+		})
+	}
+
+	db := c.GetMaster().GetDatabase().DB
+	db.Preload("Provider").Preload("Region")
+
+	if err := db.Save(dc).Error; err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, echo.Map{
+			"errors": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, dc)
 }

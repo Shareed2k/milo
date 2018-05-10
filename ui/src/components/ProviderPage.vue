@@ -3,7 +3,7 @@
 
   block content
     v-dialog(v-model='dialog', max-width='500px', persistent)
-      v-btn.mb-2(color='primary', dark='', slot='activator') New DataCenter
+      v-btn.mb-2(color='primary', dark='', slot='activator') New Provider
       v-card
         v-card-title
           span.headline {{ formTitle }}
@@ -26,22 +26,7 @@
               v-validate="'max:256'",
               data-vv-name="description"
             )
-            v-select(
-              :items='providers',
-              item-text="name",
-              item-value="ID",
-              v-model='request.provider_id',
-              label='Select Provider',
-              autocomplete=''
-            )
-            v-select(
-              :items='regions',
-              item-text="name",
-              item-value="ID",
-              v-model='request.region_id',
-              label='Select Region',
-              autocomplete=''
-            )
+
         v-card-actions
           v-spacer
           v-btn(color='blue darken-1', flat='', @click.native='close') Cancel
@@ -51,7 +36,6 @@
       template(slot='items', slot-scope='props')
         td {{ props.item.uuid }}
         td {{ props.item.name }}
-        td {{ props.item.provider.name }}
         td {{ props.item.description }}
         td.justify-center.layout.px-0
           v-btn.mx-0(icon='', @click='editItem(props.item)')
@@ -65,7 +49,7 @@
 
   export default {
     extends: App,
-    name: 'DataCenterPage',
+    name: 'ProviderPage',
 
     data: () => ({
       dialog: false,
@@ -73,49 +57,32 @@
       headers: [
         { text: 'UUID', value: 'uuid' },
         { text: 'Name', value: 'name' },
-        { text: 'Provider', value: 'provider' },
         { text: 'Description', value: 'description' },
         { text: 'Actions', value: 'name', sortable: false }
       ],
       items: [],
-      regions: [],
-      providers: [],
 
       defaultItem: {
         name: '',
-        description: '',
-        region_id: 0,
-        provider_id: 0
+        description: ''
       },
 
       request: {
         name: '',
-        description: '',
-        region_id: 0,
-        provider_id: 0
+        description: ''
       }
     }),
 
     computed: {
       formTitle () {
-        return this.editedIndex === -1 ? 'New DataCenter' : 'Edit DataCenter'
+        return this.editedIndex === -1 ? 'New Provider' : 'Edit Provider'
       }
     },
 
     methods: {
-      getDataCenter () {
-        this.$http.get('/api/datacenters')
-          .then(r => { this.items = r.data.items })
-      },
-
-      getRegions () {
-        this.$http.get('/api/regions')
-          .then(r => { this.regions = r.data.items })
-      },
-
       getProviders () {
         this.$http.get('/api/providers')
-          .then(r => { this.providers = r.data.items })
+          .then(r => { this.items = r.data.items })
       },
 
       close () {
@@ -132,11 +99,11 @@
             if (result) {
               this.valid = result
               if (this.editedIndex > -1) {
-                this.$http.put('/api/datacenters', this.request)
+                this.$http.put('/api/providers', this.request)
                   .then(r => Object.assign(this.items[this.editedIndex], this.request))
                   .then(() => this.close())
               } else {
-                this.$http.post('/api/datacenters', this.request)
+                this.$http.post('/api/providers', this.request)
                   .then(r => this.items.push(r.data))
                   .then(() => this.close())
               }
@@ -152,16 +119,14 @@
 
       deleteItem (item) {
         const index = this.items.indexOf(item)
-        this.$http.delete(`/api/datacenters/${item.uuid}`)
+        this.$http.delete(`/api/providers/${item.uuid}`)
           .then(r => console.log(r.data))
           .then(() => this.items.splice(index, 1))
       }
     },
 
     mounted () {
-      this.getDataCenter()
       this.getProviders()
-      this.getRegions()
     }
   }
 </script>

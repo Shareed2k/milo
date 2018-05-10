@@ -16,7 +16,7 @@ func NewDatabase(settings Settings) *Database {
 		panic("failed to connect database")
 	}
 
-	return &Database{db}
+	return &Database{db.Debug()}
 }
 
 func (d *Database) Close() {

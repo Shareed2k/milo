@@ -6,15 +6,15 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-type Region struct {
+type Provider struct {
 	gorm.Model
 	Uuid        string        `json:"uuid" gorm:"not null;unique_index"`
-	Name        string        `json:"name" form:"name" validate:"required" gorm:"not null;unique_index"`
+	Name        string        `json:"name" form:"name" validate:"required"`
 	Description string        `json:"description" form:"description"`
-	DataCenters []*DataCenter `json:"datacenters"`
+	DataCenters []*DataCenter `json:"datacenters" gorm:"foreignkey:ProviderID;AssociationForeignKey:ID"`
 }
 
-func (m *Region) BeforeCreate() error {
+func (m *Provider) BeforeCreate() error {
 	m.Uuid = fmt.Sprintf("%s", uuid.NewV4())
 	return nil
 }

@@ -46,7 +46,7 @@ func (h *httpServer) StartServer(l net.Listener) error {
 		return func(c echo.Context) error {
 			return next(&MiloContext{
 				Context: c,
-				Core: h.Core,
+				Core:    h.Core,
 			})
 		}
 	})
@@ -54,7 +54,7 @@ func (h *httpServer) StartServer(l net.Listener) error {
 	h.Use(middleware.Recover())
 	h.Use(middleware.Gzip())
 	h.Use(middleware.CORS())
-	h.Use(middleware.CSRF())
+	//h.Use(middleware.CSRF())
 	//h.Use(casbinmw.Middleware(casbin.NewEnforcer("./configs/auth_model.conf", "./configs/policy.csv")))
 
 	box := rice.MustFindBox("../ui/dist")

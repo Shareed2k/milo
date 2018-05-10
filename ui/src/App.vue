@@ -20,15 +20,23 @@
           items: [
             {
               title: 'Home',
-              link: '/'
+              link: '/',
+              icon: 'plus'
             },
             {
               title: 'Region',
-              link: '/regions'
+              link: '/regions',
+              icon: 'plus'
+            },
+            {
+              title: 'Provider',
+              link: '/providers',
+              icon: 'plus'
             },
             {
               title: 'DataCenter',
-              link: '/datacenters'
+              link: '/datacenters',
+              icon: 'plus'
             }
           ]
         }

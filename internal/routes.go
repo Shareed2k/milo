@@ -3,7 +3,6 @@ package internal
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 	"github.com/milo/db/models"
 	"net/http"
 )
@@ -18,11 +17,11 @@ func NewRoutes(e *echo.Echo) {
 
 	// api
 	api := e.Group("/api")
-	config := middleware.JWTConfig{
+	/*config := middleware.JWTConfig{
 		Claims:     &jwtClaims{},
 		SigningKey: []byte("secret"),
 	}
-	api.Use(middleware.JWTWithConfig(config))
+	api.Use(middleware.JWTWithConfig(config))*/
 	api.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			ctx := c.(*MiloContext)
@@ -44,6 +43,14 @@ func NewRoutes(e *echo.Echo) {
 	})
 	api.GET("/bootdata", routeHandler(bootdata))
 
+	// providers
+	provider := api.Group("/providers")
+	provider.GET("", routeHandler(indexProvider))
+	provider.GET("/:uuid", routeHandler(showProvider))
+	provider.POST("", routeHandler(storeProvider))
+	provider.DELETE("/:uuid", routeHandler(deleteProvider))
+	provider.PUT("", routeHandler(updateProvider))
+
 	// regions
 	region := api.Group("/regions")
 	region.GET("", routeHandler(indexRegion))
@@ -57,6 +64,8 @@ func NewRoutes(e *echo.Echo) {
 	dc.GET("", routeHandler(indexDataCenter))
 	dc.GET("/:uuid", routeHandler(showDataCenter))
 	dc.POST("", routeHandler(storeDataCenter))
+	dc.DELETE("/:uuid", routeHandler(deleteDataCenter))
+	dc.PUT("", routeHandler(updateDataCenter))
 
 	// servers
 	server := api.Group("/servers")
