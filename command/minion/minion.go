@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/milo/internal"
+	"github.com/milo/ipaddr"
 	"github.com/urfave/cli"
 )
 
@@ -32,11 +33,30 @@ func New() cli.Command {
 
 					store := internal.NewKeyValueStore(settings)
 
+					privateAddrs := []*internal.JoinRequest_Addr{}
+					publicAddrs := []*internal.JoinRequest_Addr{}
+					publicAddrs = append(publicAddrs, &internal.JoinRequest_Addr{
+						Ip: "123.89.89.7",
+					})
+
+					ips, err := ipaddr.GetPrivateIPv4()
+
+					if err != nil {
+						println(err.Error())
+						return err
+					}
+
+					for _, ip := range ips {
+						privateAddrs = append(privateAddrs, &internal.JoinRequest_Addr{
+							Ip: string(ip.IP),
+						})
+					}
+
 					request := &internal.JoinRequest{
 						Token: s.GetOptions().Token,
 						Minion: &internal.JoinRequest_Minion{
-							PrivateAddr: settings.BindAddr,
-							PublicAddr:  "122.45.65.12",
+							PrivateAddrs: privateAddrs,
+							PublicAddrs:  publicAddrs,
 						},
 					}
 
@@ -49,7 +69,7 @@ func New() cli.Command {
 						return err
 					}
 
-					store.Set("uuid", response.Uuid)
+					store.Set("uuid", []byte(response.Uuid))
 					val, err := store.Get("uuid")
 
 					if err != nil {

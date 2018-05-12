@@ -170,6 +170,12 @@
   version = "v0.1.4"
 
 [[projects]]
+  name = "github.com/ugorji/go"
+  packages = ["codec"]
+  revision = "b4c50a2b199d93b13dc15e78929cfb23bfdf21ab"
+  version = "v1.1.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/ulule/paging"
   packages = ["."]
@@ -232,6 +238,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "83f01255f8c7298564216ba322e2c94128557b712310386936808801a173fe8c"
+  inputs-digest = "d608d0742d1e163895c622b07bd636cc406172d48c128422379c6483f7a6ff4d"
   solver-name = "gps-cdcl"
   solver-version = 1

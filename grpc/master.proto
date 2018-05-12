@@ -10,9 +10,13 @@ service Master {
 message JoinRequest {
     string token = 1;
 
+    message Addr {
+        string Ip = 1;
+    }
+
     message Minion {
-        string PrivateAddr = 1;
-        string PublicAddr = 2;
+        repeated Addr PrivateAddrs = 1;
+        repeated Addr PublicAddrs = 2;
     }
 
     Minion minion = 2;

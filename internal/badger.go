@@ -3,8 +3,8 @@ package internal
 import "github.com/dgraph-io/badger"
 
 type KeyValueStore interface {
-	Set(key, value string) error
-	Get(key string) (string, error)
+	Set(key string, value []byte) error
+	Get(key string) ([]byte, error)
 }
 
 type store struct {
@@ -25,13 +25,13 @@ func NewKeyValueStore(s Settings) KeyValueStore {
 	return &store{settings: s, DB: db}
 }
 
-func (s *store) Set(key, value string) error {
+func (s *store) Set(key string, value []byte) error {
 	return s.DB.Update(func(txn *badger.Txn) error {
-		return txn.Set([]byte(key), []byte(value))
+		return txn.Set([]byte(key), value)
 	})
 }
 
-func (s *store) Get(key string) (string, error) {
+func (s *store) Get(key string) ([]byte, error) {
 	var value []byte
 	err := s.DB.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(key))
@@ -49,7 +49,7 @@ func (s *store) Get(key string) (string, error) {
 		return nil
 	})
 
-	return string(value), err
+	return value, err
 }
 
 func (s *store) Close() {

@@ -11,7 +11,7 @@ import (
 type Settings struct {
 	ConfigFilePath  string `json:"-"`
 	SupportPassword string `json:"support_password"`
-	BindAddr        string `json:"bind_addr"`
+	BindAddr        string `json:"bind_addr" default:"0.0.0.0"`
 	PrivateAddr     string `json:"private_addr"`
 	MasterAddr      string `json:"master_addr"`
 	NodeName        string `json:"node_name"`

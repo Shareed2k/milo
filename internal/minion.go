@@ -6,7 +6,8 @@ import (
 )
 
 type MinionOperator interface {
-	InitBootstrap () error
+	InitBootstrap() error
+	GetKeyValueStore() KeyValueStore
 	Close()
 }
 
@@ -19,14 +20,14 @@ type minion struct {
 
 func NewMinion(c Core) MinionOperator {
 	return &minion{
-		Core: c,
+		Core:          c,
 		KeyValueStore: NewKeyValueStore(c.GetSettings()),
-		GrpcClient: NewGrpcClient(c.GetSettings()),
-		MinionServer: NewMinionGrpcServer(c),
+		GrpcClient:    NewGrpcClient(c.GetSettings()),
+		MinionServer:  NewMinionGrpcServer(c),
 	}
 }
 
-func (m *minion) InitBootstrap () error {
+func (m *minion) InitBootstrap() error {
 	settings := m.GetSettings()
 
 	list, err := net.Listen("tcp", fmt.Sprintf(":%s", settings.GrpcPort))
@@ -47,4 +48,8 @@ func (m *minion) Close() {
 
 func (m *minion) getGrpcServer() MinionGrpcServer {
 	return m.MinionServer.(MinionGrpcServer)
+}
+
+func (m *minion) GetKeyValueStore() KeyValueStore {
+	return m.KeyValueStore
 }

@@ -4,6 +4,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"net"
+	"github.com/ugorji/go/codec"
 	"github.com/milo/ipaddr"
 	"fmt"
 )
@@ -35,10 +36,12 @@ func (s *minionServer) PassRule(ctx context.Context, in *RuleRequest) (*RuleResp
 
 func (s *minionServer) GetStats(ctx context.Context, in *StatsRequest) (*StatsResponse, error) {
 	ports := []*StatsResponse_Process{}
+	nums := map[int64]int64{}
 	for _, proto := range []string{"tcp", "tcp6", "udp", "udp6"} {
 		for _, p := range netstat(proto) {
 			// Check STATE to show only Listening connections
 			if p.State == "LISTEN" {
+				nums[p.Port] = p.Port
 				ports = append(ports, &StatsResponse_Process{
 					Ip:          p.Ip,
 					Port:        p.Port,
@@ -52,29 +55,32 @@ func (s *minionServer) GetStats(ctx context.Context, in *StatsRequest) (*StatsRe
 		}
 	}
 
-	ports2 := []*StatsResponse_Process{}
-	for _, proto := range []string{"tcp", "udp6"} {
-		for _, p := range netstat(proto) {
-			// Check STATE to show only Listening connections
-			if p.State == "LISTEN" {
-				ports2 = append(ports2, &StatsResponse_Process{
-					Ip:          p.Ip,
-					Port:        p.Port,
-					State:       p.State,
-					ProcessName: p.Name,
-					User:        p.User,
-					Pid:         p.Pid,
-					Proto:       proto,
-				})
-			}
+	// TODO: need to create ticker and create task to get post and decode to byte and save in badger
+	// on request from master return response from budger
+
+	kv := s.GetMinion().GetKeyValueStore()
+	val, err := kv.Get("ports_list")
+
+	var mh codec.MsgpackHandle
+
+	// we have last value of ports
+	last_ports := map[int64]int64{}
+	if err == nil {
+		dec := codec.NewDecoderBytes(val, &mh)
+		err = dec.Decode(&last_ports)
+
+		if diff := Equal(val, last_ports); diff != nil {
+			fmt.Println(diff)
 		}
+	} else { // fresh need to save
+		raw := []byte{}
+		enc := codec.NewEncoderBytes(&raw, &mh)
+		err = enc.Encode(nums)
+
+		kv.Set("ports_list", raw)
 	}
 
 	ips, err := ipaddr.GetPrivateIPv4()
-
-	if diff := Equal(ports, ports2); diff != nil {
-		fmt.Println(diff)
-	}
 
 	fmt.Println(ips)
 
